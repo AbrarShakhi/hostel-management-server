@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/abrarshakhi/hostel-management-server/internal/handlers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -17,20 +18,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 	}))
 
-	r.GET("/", s.HelloWorldHandler)
-
-	r.GET("/health", s.healthHandler)
+	h := handlers.NewHandlers(s.db)
+	api := r.Group("/api")
+	{
+		api.GET("/", h.HelloWorldHandler)
+		api.GET("/health", h.HealthHandler)
+	}
 
 	return r
-}
-
-func (s *Server) HelloWorldHandler(c *gin.Context) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	c.JSON(http.StatusOK, resp)
-}
-
-func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
 }
