@@ -25,6 +25,10 @@ tmp/
 # .env file
 .env
 
+# database files
+*.db
+*.sqlite3
+
 # Project build
 main
 *templ.go
