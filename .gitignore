@@ -30,7 +30,7 @@ tmp/
 *.sqlite3
 
 # Project build
-main
+# main
 *templ.go
 
 # OS X generated file

@@ -18,6 +18,7 @@ type Service interface {
 	Close() error
 	Query(query string, args ...any) (*sql.Rows, error)
 	Exec(query string, args ...any) (sql.Result, error)
+	QueryRow(query string, args ...any) *sql.Row
 }
 
 type service struct {
@@ -51,6 +52,10 @@ func New() Service {
 
 func (s *service) Query(query string, args ...any) (*sql.Rows, error) {
 	return s.db.Query(query, args...)
+}
+
+func (s *service) QueryRow(query string, args ...any) *sql.Row {
+	return s.db.QueryRow(query, args...)
 }
 
 func (s *service) Exec(query string, args ...any) (sql.Result, error) {
