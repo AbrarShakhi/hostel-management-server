@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/abrarshakhi/hostel-management-server/internal/database"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User_ struct {
 	Id          string
 	Email       string
 	Phone       string
-	Password_   sql.NullString
+	password_   sql.NullString
 	FirstName   string
 	LastName    sql.NullString
 	DateOfBirth time.Time
@@ -42,7 +43,7 @@ func (m *User_) Update(db database.Service) error {
 	_, err := db.Exec(query,
 		m.Email,
 		m.Phone,
-		m.Password_,
+		m.password_,
 		m.FirstName,
 		m.LastName,
 		m.DateOfBirth,
@@ -55,6 +56,20 @@ func (m *User_) Update(db database.Service) error {
 	)
 
 	return err
+}
+
+func (m *User_) ComparePassword(inputPassword string) bool {
+	if !m.HasPassword() {
+		return false
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(m.password_.String), []byte(inputPassword)); err != nil {
+		return false
+	}
+	return true
+}
+
+func (m *User_) HasPassword() bool {
+	return m.password_.Valid
 }
 
 func FindByEmail(db database.Service, email string) (*User_, error) {
@@ -71,7 +86,7 @@ func FindByEmail(db database.Service, email string) (*User_, error) {
 		&user.Id,
 		&user.Email,
 		&user.Phone,
-		&user.Password_,
+		&user.password_,
 		&user.FirstName,
 		&user.LastName,
 		&user.DateOfBirth,
@@ -105,7 +120,7 @@ func FindByPhone(db database.Service, phone string) (*User_, error) {
 		&user.Id,
 		&user.Email,
 		&user.Phone,
-		&user.Password_,
+		&user.password_,
 		&user.FirstName,
 		&user.LastName,
 		&user.DateOfBirth,

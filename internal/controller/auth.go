@@ -10,16 +10,13 @@ import (
 	"github.com/abrarshakhi/hostel-management-server/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
-type LoginRequest struct {
-	Identifier string `json:"identifier" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-}
-
 func (h *Controller) UserLogin(c *gin.Context) {
-	var req LoginRequest
+	req := struct {
+		Identifier string `json:"identifier" binding:"required"`
+		Password   string `json:"password" binding:"required"`
+	}{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "Invalid request payload"})
@@ -33,23 +30,27 @@ func (h *Controller) UserLogin(c *gin.Context) {
 	} else {
 		user, err = model.FindByPhone(h.db, req.Identifier)
 	}
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
 		return
 	}
 	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email, phone, password."})
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email or phone."})
 		return
 	}
 
-	if !user.Password_.Valid {
+	if !user.HasPassword() {
 		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Your account is not active yet. Active it first."})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password_.String), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email, phone, password."})
+	if !user.ComparePassword(req.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid password."})
+		return
+	}
+
+	if user.HasLeft {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "You have left the hostel."})
 		return
 	}
 

@@ -27,7 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	{
 		api.GET("/", controller.HelloWorld)
 		api.GET("/health", controller.Health)
-		api.GET("/auth-check", middleware.VerifyUser, controller.Health)
+		api.POST("/login", controller.UserLogin)
 	}
 
 	return r
