@@ -24,7 +24,7 @@ func (m *Middleware) VerifyUser(c *gin.Context) {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header)
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
+	}, jwt.WithLeeway(5*time.Second))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "cookie error",

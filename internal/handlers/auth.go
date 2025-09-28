@@ -58,7 +58,7 @@ func (h *Handlers) UserLogin(c *gin.Context) {
 		return
 	}
 
-	_, err = h.db.Exec(`UPDATE user_ SET last_login = $1 WHERE id = $2`, time.Now(), id)
+	_, err = h.db.Exec(`UPDATE user_ SET last_login = $1 WHERE id = $2`, time.Now().UTC(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login time"})
 		return
