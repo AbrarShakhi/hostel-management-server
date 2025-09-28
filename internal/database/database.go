@@ -16,6 +16,8 @@ import (
 type Service interface {
 	Health() map[string]string
 	Close() error
+	Query(query string, args ...any) (*sql.Rows, error)
+	Exec(query string, args ...any) (sql.Result, error)
 }
 
 type service struct {
@@ -45,6 +47,14 @@ func New() Service {
 		db: db,
 	}
 	return dbInstance
+}
+
+func (s *service) Query(query string, args ...any) (*sql.Rows, error) {
+	return s.db.Query(query, args...)
+}
+
+func (s *service) Exec(query string, args ...any) (sql.Result, error) {
+	return s.db.Exec(query, args...)
 }
 
 func (s *service) Health() map[string]string {
