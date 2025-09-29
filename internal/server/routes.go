@@ -3,9 +3,11 @@ package server
 import (
 	"net/http"
 
-	"github.com/abrarshakhi/hostel-management-server/internal/handlers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/abrarshakhi/hostel-management-server/internal/controller"
+	"github.com/abrarshakhi/hostel-management-server/internal/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -18,11 +20,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 	}))
 
-	h := handlers.NewHandlers(s.db)
+	middleware := middleware.NewMiddleware()
+	controller := controller.NewController(s.db, s.email)
+
 	api := r.Group("/api")
 	{
-		api.GET("/", h.HelloWorldHandler)
-		api.GET("/health", h.HealthHandler)
+		api.GET("/", controller.HelloWorld)
+		api.GET("/health", controller.Health)
+
+		api.POST("/login", controller.UserLogin)
+		api.GET("/logout", controller.UserLogOut)
+		api.GET("/auth-check", middleware.VerifyUser, controller.UserAuthCheck)
 	}
 
 	return r

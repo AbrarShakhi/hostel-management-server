@@ -1,4 +1,4 @@
-package database
+package service
 
 import (
 	"context"
@@ -13,13 +13,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type Service interface {
-	Health() map[string]string
-	Close() error
-}
-
-type service struct {
-	db *sql.DB
+type Database struct {
+	psql *sql.DB
 }
 
 var (
@@ -29,31 +24,43 @@ var (
 	port       = os.Getenv("POSTGRES_DB_PORT")
 	host       = os.Getenv("POSTGRES_DB_HOST")
 	schema     = os.Getenv("POSTGRES_DB_SCHEMA")
-	dbInstance *service
+	dbInstance *Database
 )
 
-func New() Service {
-	if dbInstance != nil {
-		return dbInstance
-	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbInstance = &service{
-		db: db,
-	}
+func DbInstance() *Database {
+	once.Do(func() {
+		psql, err := sql.Open("pgx",
+			fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
+				username, password, host, port, database, schema))
+		if err != nil {
+			log.Fatal(err)
+		}
+		dbInstance = &Database{
+			psql: psql,
+		}
+	})
 	return dbInstance
 }
 
-func (s *service) Health() map[string]string {
+func (s *Database) Query(query string, args ...any) (*sql.Rows, error) {
+	return s.psql.Query(query, args...)
+}
+
+func (s *Database) QueryRow(query string, args ...any) *sql.Row {
+	return s.psql.QueryRow(query, args...)
+}
+
+func (s *Database) Exec(query string, args ...any) (sql.Result, error) {
+	return s.psql.Exec(query, args...)
+}
+
+func (s *Database) Health() map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	stats := make(map[string]string)
 
-	err := s.db.PingContext(ctx)
+	err := s.psql.PingContext(ctx)
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
@@ -64,7 +71,7 @@ func (s *service) Health() map[string]string {
 	stats["status"] = "up"
 	stats["message"] = "It's healthy"
 
-	dbStats := s.db.Stats()
+	dbStats := s.psql.Stats()
 	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
 	stats["in_use"] = strconv.Itoa(dbStats.InUse)
 	stats["idle"] = strconv.Itoa(dbStats.Idle)
@@ -92,7 +99,7 @@ func (s *service) Health() map[string]string {
 	return stats
 }
 
-func (s *service) Close() error {
+func (s *Database) Close() error {
 	log.Printf("Disconnected from database: %s", database)
-	return s.db.Close()
+	return s.psql.Close()
 }
