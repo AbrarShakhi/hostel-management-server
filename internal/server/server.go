@@ -9,15 +9,15 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/abrarshakhi/hostel-management-server/internal/database"
+	"github.com/abrarshakhi/hostel-management-server/internal/service"
 )
 
 type Server struct {
 	port int
-	db   database.Service
+	db   service.Database
 }
 
-func (s *Server) Db() database.Service {
+func (s *Server) Db() service.Database {
 	return s.db
 }
 
@@ -26,7 +26,7 @@ func NewServer() *http.Server {
 
 	NewServer := &Server{
 		port: port,
-		db:   database.New(),
+		db:   service.DbInstance(),
 	}
 
 	server := &http.Server{

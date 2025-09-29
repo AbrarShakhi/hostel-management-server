@@ -1,7 +1,7 @@
 package model
 
-import "github.com/abrarshakhi/hostel-management-server/internal/database"
+import "github.com/abrarshakhi/hostel-management-server/internal/service"
 
 type Model interface {
-	Update(db database.Service) error
+	Update(db service.Database) error
 }

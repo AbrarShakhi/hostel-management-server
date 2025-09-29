@@ -1,4 +1,4 @@
-package database
+package service
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type Service interface {
+type Database interface {
 	Health() map[string]string
 	Close() error
 	Query(query string, args ...any) (*sql.Rows, error)
@@ -21,7 +21,7 @@ type Service interface {
 	QueryRow(query string, args ...any) *sql.Row
 }
 
-type service struct {
+type postgresSql struct {
 	db *sql.DB
 }
 
@@ -32,10 +32,10 @@ var (
 	port       = os.Getenv("POSTGRES_DB_PORT")
 	host       = os.Getenv("POSTGRES_DB_HOST")
 	schema     = os.Getenv("POSTGRES_DB_SCHEMA")
-	dbInstance *service
+	dbInstance *postgresSql
 )
 
-func New() Service {
+func DbInstance() Database {
 	if dbInstance != nil {
 		return dbInstance
 	}
@@ -44,25 +44,25 @@ func New() Service {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbInstance = &service{
+	dbInstance = &postgresSql{
 		db: db,
 	}
 	return dbInstance
 }
 
-func (s *service) Query(query string, args ...any) (*sql.Rows, error) {
+func (s *postgresSql) Query(query string, args ...any) (*sql.Rows, error) {
 	return s.db.Query(query, args...)
 }
 
-func (s *service) QueryRow(query string, args ...any) *sql.Row {
+func (s *postgresSql) QueryRow(query string, args ...any) *sql.Row {
 	return s.db.QueryRow(query, args...)
 }
 
-func (s *service) Exec(query string, args ...any) (sql.Result, error) {
+func (s *postgresSql) Exec(query string, args ...any) (sql.Result, error) {
 	return s.db.Exec(query, args...)
 }
 
-func (s *service) Health() map[string]string {
+func (s *postgresSql) Health() map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -107,7 +107,7 @@ func (s *service) Health() map[string]string {
 	return stats
 }
 
-func (s *service) Close() error {
+func (s *postgresSql) Close() error {
 	log.Printf("Disconnected from database: %s", database)
 	return s.db.Close()
 }

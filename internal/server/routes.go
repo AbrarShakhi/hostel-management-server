@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/abrarshakhi/hostel-management-server/internal/controller"
-	"github.com/abrarshakhi/hostel-management-server/internal/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -20,7 +19,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 	}))
 
-	middleware := middleware.NewMiddleware()
+	// middleware := middleware.NewMiddleware()
 
 	controller := controller.NewController(s.db)
 	api := r.Group("/api")

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/abrarshakhi/hostel-management-server/internal/database"
+	"github.com/abrarshakhi/hostel-management-server/internal/service"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,7 +23,7 @@ type User_ struct {
 	HasLeft     bool
 }
 
-func (m *User_) Update(db database.Service) error {
+func (m *User_) Update(db service.Database) error {
 	query := `
 		UPDATE user_
 		SET email = $1,
@@ -72,7 +72,7 @@ func (m *User_) HasPassword() bool {
 	return m.password_.Valid
 }
 
-func FindByEmail(db database.Service, email string) (*User_, error) {
+func FindByEmail(db service.Database, email string) (*User_, error) {
 	var user User_
 
 	row := db.QueryRow(`
@@ -106,7 +106,7 @@ func FindByEmail(db database.Service, email string) (*User_, error) {
 	return &user, nil
 }
 
-func FindByPhone(db database.Service, phone string) (*User_, error) {
+func FindByPhone(db service.Database, phone string) (*User_, error) {
 	var user User_
 
 	row := db.QueryRow(`

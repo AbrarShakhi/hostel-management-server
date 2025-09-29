@@ -1,13 +1,11 @@
 package controller
 
-import (
-	"github.com/abrarshakhi/hostel-management-server/internal/database"
-)
+import "github.com/abrarshakhi/hostel-management-server/internal/service"
 
 type Controller struct {
-	db database.Service
+	db service.Database
 }
 
-func NewController(db database.Service) *Controller {
+func NewController(db service.Database) *Controller {
 	return &Controller{db: db}
 }
