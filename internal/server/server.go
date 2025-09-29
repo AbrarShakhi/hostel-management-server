@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,20 +14,28 @@ import (
 )
 
 type Server struct {
-	port int
-	db   service.Database
-}
-
-func (s *Server) Db() service.Database {
-	return s.db
+	port  int
+	db    service.Database
+	email service.Email
 }
 
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	db := service.DbInstance()
+	if db == nil {
+		log.Fatal("db instance is nil: Unable to create database service")
+		return nil
+	}
+	email := service.EmailInstance()
+	if email == nil {
+		log.Fatal("email instance is nil: Unable to create email service")
+		return nil
+	}
 
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
-		port: port,
-		db:   service.DbInstance(),
+		port:  port,
+		db:    *db,
+		email: *email,
 	}
 
 	server := &http.Server{

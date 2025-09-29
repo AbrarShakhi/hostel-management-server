@@ -77,8 +77,23 @@ func (h *Controller) UserLogin(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("user_auth", signedToken, 3600*24*30, "", "", false, false)
 	c.JSON(http.StatusOK, gin.H{
-		"user_id": user.Id,
-		"phone":   user.Phone,
-		"email":   user.Email,
+		"user_id":    user.Id,
+		"phone":      user.Phone,
+		"email":      user.Email,
+		"first_name": user.FirstName,
+		"last_name":  user.LastLogin,
+		"created_at": user.CreatedOn,
 	})
+}
+
+func (h *Controller) UserLogOut(c *gin.Context) {
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("user_auth", "", -1, "", "", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "Successfully logged out",
+	})
+}
+
+func (h *Controller) UserAuthCheck(c *gin.Context) {
+
 }

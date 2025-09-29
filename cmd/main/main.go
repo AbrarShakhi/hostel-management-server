@@ -35,6 +35,9 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 func main() {
 
 	server := server.NewServer()
+	if server == nil {
+		log.Fatal("Server is nil")
+	}
 
 	done := make(chan bool, 1)
 
