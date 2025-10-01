@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (h *Controller) UserLogin(c *gin.Context) {
+func (h *controller) UserLogin(c *gin.Context) {
 	req := struct {
 		Identifier string `json:"identifier" binding:"required"`
 		Password   string `json:"password" binding:"required"`
@@ -86,7 +86,7 @@ func (h *Controller) UserLogin(c *gin.Context) {
 	})
 }
 
-func (h *Controller) UserLogOut(c *gin.Context) {
+func (h *controller) UserLogOut(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("user_auth", "", -1, "", "", false, false)
 	c.JSON(http.StatusOK, gin.H{
@@ -94,6 +94,6 @@ func (h *Controller) UserLogOut(c *gin.Context) {
 	})
 }
 
-func (h *Controller) UserAuthCheck(c *gin.Context) {
+func (h *controller) UserAuthCheck(c *gin.Context) {
 
 }

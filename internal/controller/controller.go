@@ -7,13 +7,13 @@ import (
 	"github.com/abrarshakhi/hostel-management-server/internal/service"
 )
 
-type Controller struct {
+type controller struct {
 	db    service.Database
 	email service.Email
 }
 
 func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
-	middleware, controller := middleware.NewMiddleware(), &Controller{db: db, email: email}
+	middleware, controller := middleware.NewMiddleware(), &controller{db: db, email: email}
 
 	rg.GET("/", controller.HelloWorld)
 	rg.GET("/health", controller.Health)
@@ -24,7 +24,7 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 }
 
 func InitAdminsRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
-	_, controller := middleware.NewMiddleware(), &Controller{db: db, email: email}
+	_, controller := middleware.NewMiddleware(), &controller{db: db, email: email}
 
 	rg.GET("/", controller.HelloWorld)
 	rg.GET("/health", controller.Health)
