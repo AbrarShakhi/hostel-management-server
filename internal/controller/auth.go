@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (h *controller) UserLogin(c *gin.Context) {
+func (h *controller) userLogin(c *gin.Context) {
 	req := struct {
 		Identifier string `json:"identifier" binding:"required"`
 		Password   string `json:"password" binding:"required"`
@@ -92,7 +92,7 @@ func (h *controller) UserLogin(c *gin.Context) {
 	})
 }
 
-func (h *controller) UserLogOut(c *gin.Context) {
+func (h *controller) userLogOut(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("user_auth", "", -1, "", "", false, false)
 	c.JSON(http.StatusOK, gin.H{
@@ -100,7 +100,7 @@ func (h *controller) UserLogOut(c *gin.Context) {
 	})
 }
 
-func (h *controller) UserAuthCheck(c *gin.Context) {
+func (h *controller) userAuthCheck(c *gin.Context) {
 	userIdAny, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
@@ -135,4 +135,17 @@ func (h *controller) UserAuthCheck(c *gin.Context) {
 		"last_name":  lastName,
 		"created_at": user.CreatedAt,
 	})
+}
+
+func (h *controller) userActivateAccount(c *gin.Context) {
+}
+
+func (h *controller) userForgatePassword(c *gin.Context) {
+}
+
+func (h *controller) userChangePassword(c *gin.Context) {
+	// protected
+}
+
+func (h *controller) userSendOtp(c *gin.Context) {
 }
