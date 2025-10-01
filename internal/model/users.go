@@ -9,7 +9,7 @@ import (
 )
 
 type Users struct {
-	Id          string
+	UserId      int
 	Email       string
 	Phone       string
 	password    sql.NullString
@@ -52,10 +52,44 @@ func (m *Users) Update(db service.Database) error {
 		m.CreatedAt,
 		m.LastLogin,
 		m.HasLeft,
-		m.Id,
+		m.UserId,
 	)
 
 	return err
+}
+
+func FindById(db service.Database, userId int) (*Users, error) {
+	var user Users
+
+	row := db.QueryRow(`
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
+		       gender, nationality, created_at, last_login, has_left 
+		FROM users
+		WHERE user_id = $1 
+		LIMIT 1`, userId)
+
+	err := row.Scan(
+		&user.UserId,
+		&user.Email,
+		&user.Phone,
+		&user.password,
+		&user.FirstName,
+		&user.LastName,
+		&user.DateOfBirth,
+		&user.Gender,
+		&user.Nationality,
+		&user.CreatedAt,
+		&user.LastLogin,
+		&user.HasLeft,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (m *Users) ComparePassword(inputPassword string) bool {
@@ -76,14 +110,14 @@ func FindByEmail(db service.Database, email string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
-		SELECT id, email, phone, "password", first_name, last_name, date_of_birth, 
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
 		       gender, nationality, created_at, last_login, has_left 
 		FROM users
 		WHERE email = $1 
 		LIMIT 1`, email)
 
 	err := row.Scan(
-		&user.Id,
+		&user.UserId,
 		&user.Email,
 		&user.Phone,
 		&user.password,
@@ -110,14 +144,14 @@ func FindByPhone(db service.Database, phone string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
-		SELECT id, email, phone, "password", first_name, last_name, date_of_birth, 
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
 		       gender, nationality, created_at, last_login, has_left 
 		FROM users
 		WHERE phone = $1
 		LIMIT 1`, phone)
 
 	err := row.Scan(
-		&user.Id,
+		&user.UserId,
 		&user.Email,
 		&user.Phone,
 		&user.password,
