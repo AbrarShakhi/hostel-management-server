@@ -23,6 +23,9 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 	rg.GET("/auth-check", middleware.VerifyUser, controller.userAuthCheck)
 
 	rg.PATCH("/change-password", controller.userChangePassword)
+	rg.PATCH("/forget-password", controller.userForgetPassword)
+
+	rg.POST("/send-otp", middleware.IdentifyOtpUser, controller.userSendOtp)
 }
 
 func InitAdminsRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {

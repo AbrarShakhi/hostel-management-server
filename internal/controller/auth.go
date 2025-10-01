@@ -145,7 +145,7 @@ func (h *controller) userAuthCheck(c *gin.Context) {
 func (h *controller) userActivateAccount(c *gin.Context) {
 }
 
-func (h *controller) userForgatePassword(c *gin.Context) {
+func (h *controller) userForgetPassword(c *gin.Context) {
 }
 
 func (h *controller) userChangePassword(c *gin.Context) {
