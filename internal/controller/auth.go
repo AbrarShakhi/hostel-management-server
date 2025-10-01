@@ -23,7 +23,7 @@ func (h *Controller) UserLogin(c *gin.Context) {
 		return
 	}
 
-	var user *model.User_
+	var user *model.Users
 	var err error
 	if strings.Contains(req.Identifier, "@") {
 		user, err = model.FindByEmail(h.db, req.Identifier)
@@ -82,7 +82,7 @@ func (h *Controller) UserLogin(c *gin.Context) {
 		"email":      user.Email,
 		"first_name": user.FirstName,
 		"last_name":  user.LastLogin,
-		"created_at": user.CreatedOn,
+		"created_at": user.CreatedAt,
 	})
 }
 
