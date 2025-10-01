@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -62,9 +63,13 @@ func (h *Controller) UserLogin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Failed to update login time"})
 		return
 	}
+	lastName := ""
+	if user.LastName.Valid {
+		lastName = user.LastName.String
+	}
 
 	claims := jwt.MapClaims{
-		"sub": user.Id,
+		"sub": strconv.Itoa(user.UserId),
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -77,11 +82,12 @@ func (h *Controller) UserLogin(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("user_auth", signedToken, 3600*24*30, "", "", false, false)
 	c.JSON(http.StatusOK, gin.H{
-		"user_id":    user.Id,
+		"msg":        "User is authenticated",
+		"user_id":    user.UserId,
 		"phone":      user.Phone,
 		"email":      user.Email,
 		"first_name": user.FirstName,
-		"last_name":  user.LastLogin,
+		"last_name":  lastName,
 		"created_at": user.CreatedAt,
 	})
 }
@@ -95,5 +101,38 @@ func (h *Controller) UserLogOut(c *gin.Context) {
 }
 
 func (h *Controller) UserAuthCheck(c *gin.Context) {
+	userIdAny, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
+		return
+	}
+	userId, ok := userIdAny.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Failed to parse user ID"})
+		return
+	}
 
+	user, err := model.FindById(h.db, userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email or phone."})
+		return
+	}
+
+	lastName := ""
+	if user.LastName.Valid {
+		lastName = user.LastName.String
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg":        "User is authenticated",
+		"user_id":    user.UserId,
+		"phone":      user.Phone,
+		"email":      user.Email,
+		"first_name": user.FirstName,
+		"last_name":  lastName,
+		"created_at": user.CreatedAt,
+	})
 }
