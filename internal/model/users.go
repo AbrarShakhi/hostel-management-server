@@ -92,6 +92,21 @@ func FindById(db service.Database, userId int) (*Users, error) {
 	return &user, nil
 }
 
+func (m *Users) SetPassword(db service.Database, inputPassword string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(inputPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	m.password = sql.NullString{
+		String: string(hashedPassword),
+		Valid:  true,
+	}
+
+	_, err = db.Exec(`UPDATE users SET "password" = $1 WHERE id = $2`, m.password, m.UserId)
+
+	return err
+}
+
 func (m *Users) ComparePassword(inputPassword string) bool {
 	if !m.HasPassword() {
 		return false
