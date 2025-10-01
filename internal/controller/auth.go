@@ -82,7 +82,7 @@ func (h *Controller) UserLogin(c *gin.Context) {
 		"email":      user.Email,
 		"first_name": user.FirstName,
 		"last_name":  user.LastLogin,
-		"created_at": user.CreatedOn,
+		"created_at": user.CreatedAt,
 	})
 }
 

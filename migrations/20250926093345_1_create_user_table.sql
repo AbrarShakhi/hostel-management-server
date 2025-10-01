@@ -20,7 +20,7 @@ CREATE TABLE users (
                        gender IN ('M', 'F', 'O')
                    ),
     nationality    VARCHAR(16) NOT NULL,
-    created_on     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_login     TIMESTAMPTZ,
     has_left       BOOLEAN NOT NULL DEFAULT FALSE
 );

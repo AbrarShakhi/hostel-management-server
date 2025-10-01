@@ -18,7 +18,7 @@ type Users struct {
 	DateOfBirth time.Time
 	Gender      string
 	Nationality string
-	CreatedOn   time.Time
+	CreatedAt   time.Time
 	LastLogin   sql.NullTime
 	HasLeft     bool
 }
@@ -34,7 +34,7 @@ func (m *Users) Update(db service.Database) error {
 		    date_of_birth = $6,
 		    gender = $7,
 		    nationality = $8,
-		    created_on = $9,
+		    created_at = $9,
 		    last_login = $10,
 		    has_left = $11
 		WHERE id = $12
@@ -49,7 +49,7 @@ func (m *Users) Update(db service.Database) error {
 		m.DateOfBirth,
 		m.Gender,
 		m.Nationality,
-		m.CreatedOn,
+		m.CreatedAt,
 		m.LastLogin,
 		m.HasLeft,
 		m.Id,
@@ -77,7 +77,7 @@ func FindByEmail(db service.Database, email string) (*Users, error) {
 
 	row := db.QueryRow(`
 		SELECT id, email, phone, "password", first_name, last_name, date_of_birth, 
-		       gender, nationality, created_on, last_login, has_left 
+		       gender, nationality, created_at, last_login, has_left 
 		FROM users
 		WHERE email = $1 
 		LIMIT 1`, email)
@@ -92,7 +92,7 @@ func FindByEmail(db service.Database, email string) (*Users, error) {
 		&user.DateOfBirth,
 		&user.Gender,
 		&user.Nationality,
-		&user.CreatedOn,
+		&user.CreatedAt,
 		&user.LastLogin,
 		&user.HasLeft,
 	)
@@ -111,7 +111,7 @@ func FindByPhone(db service.Database, phone string) (*Users, error) {
 
 	row := db.QueryRow(`
 		SELECT id, email, phone, "password", first_name, last_name, date_of_birth, 
-		       gender, nationality, created_on, last_login, has_left 
+		       gender, nationality, created_at, last_login, has_left 
 		FROM users
 		WHERE phone = $1
 		LIMIT 1`, phone)
@@ -126,7 +126,7 @@ func FindByPhone(db service.Database, phone string) (*Users, error) {
 		&user.DateOfBirth,
 		&user.Gender,
 		&user.Nationality,
-		&user.CreatedOn,
+		&user.CreatedAt,
 		&user.LastLogin,
 		&user.HasLeft,
 	)
