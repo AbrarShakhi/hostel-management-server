@@ -30,7 +30,7 @@ tmp/
 *.sqlite3
 
 # Project build
-# main
+hostel-management-server
 *templ.go
 
 # OS X generated file
