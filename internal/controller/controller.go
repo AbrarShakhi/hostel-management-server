@@ -18,9 +18,9 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 	rg.GET("/", controller.HelloWorld)
 	rg.GET("/health", controller.Health)
 
-	rg.POST("/login", controller.UserLogin)
-	rg.GET("/logout", controller.UserLogOut)
-	rg.GET("/auth-check", middleware.VerifyUser, controller.UserAuthCheck)
+	rg.POST("/login", controller.userLogin)
+	rg.DELETE("/logout", controller.userLogOut)
+	rg.GET("/auth-check", middleware.VerifyUser, controller.userAuthCheck)
 }
 
 func InitAdminsRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
