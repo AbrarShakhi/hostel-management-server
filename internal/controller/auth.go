@@ -36,7 +36,7 @@ func (h *controller) userLogin(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email or phone."})
+		c.JSON(http.StatusNotFound, gin.H{"msg": "Invalid user email or phone."})
 		return
 	}
 
@@ -118,7 +118,12 @@ func (h *controller) userAuthCheck(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Invalid user email or phone."})
+		c.JSON(http.StatusNotFound, gin.H{"msg": "Invalid user email or phone."})
+		return
+	}
+
+	if user.HasLeft {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "You have left the hostel."})
 		return
 	}
 
@@ -144,7 +149,60 @@ func (h *controller) userForgatePassword(c *gin.Context) {
 }
 
 func (h *controller) userChangePassword(c *gin.Context) {
-	// protected
+	req := struct {
+		NewPassword string `json:"new_password" binding:"required"`
+		OldPassword string `json:"old_password" binding:"required"`
+	}{}
+	userIdAny, exists := c.Get("user_id")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
+		return
+	}
+	userId, ok := userIdAny.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Failed to parse user ID"})
+		return
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "Invalid request payload"})
+		return
+	}
+
+	if len(req.NewPassword) < 8 || len(req.NewPassword) > 40 {
+		c.JSON(http.StatusLengthRequired, gin.H{"msg": "Password length must be between 8 to 40 charecter long."})
+		return
+	}
+
+	user, err := model.FindById(h.db, userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"msg": "Invalid user email or phone."})
+		return
+	}
+
+	if !user.HasPassword() {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Your account is not active yet. Active it first."})
+		return
+	}
+	if !user.ComparePassword(req.OldPassword) {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "Old password did not matched."})
+		return
+	}
+	if user.HasLeft {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "You have left the hostel."})
+		return
+	}
+
+	err = user.SetPassword(h.db, req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend updating your password."})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "Password change successfull."})
 }
 
 func (h *controller) userSendOtp(c *gin.Context) {

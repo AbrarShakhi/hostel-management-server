@@ -21,6 +21,8 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 	rg.POST("/login", controller.userLogin)
 	rg.DELETE("/logout", controller.userLogOut)
 	rg.GET("/auth-check", middleware.VerifyUser, controller.userAuthCheck)
+
+	rg.PATCH("/change-password", controller.userChangePassword)
 }
 
 func InitAdminsRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
