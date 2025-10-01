@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (m *Middleware) VerifyUser(c *gin.Context) {
+func (m *middleware) VerifyUser(c *gin.Context) {
 	tokenString, err := c.Cookie("user_auth")
 	if err != nil {
 		m.unauthorizedCookieError(c)
