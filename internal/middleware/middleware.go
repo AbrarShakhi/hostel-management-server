@@ -14,7 +14,7 @@ func NewMiddleware() *Middleware {
 }
 
 func (m *Middleware) unauthorizedCookieError(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+	c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 		"msg": "cookie error",
 	})
 }
