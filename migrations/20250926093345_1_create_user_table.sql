@@ -23,8 +23,7 @@ CREATE TABLE user_address (
     state_         VARCHAR(128)                  CHECK (state_ IS NULL OR state_ ~* '^[A-Za-z\s\/\.\-]+$'),
     postal_code    VARCHAR(16)                   CHECK (postal_code IS NULL OR postal_code ~* '^[A-Za-z0-9\s-]+$'),
     country        VARCHAR(128) NOT NULL         CHECK (country ~* '^[A-Za-z\s\/\.\-]+$'),
-    user_id        INTEGER      UNIQUE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user_(id) ON DELETE CASCADE
+    FOREIGN KEY (id) REFERENCES user_(id) ON DELETE CASCADE
 );
 -- +goose StatementEnd
 -- +goose StatementBegin
@@ -33,8 +32,7 @@ CREATE TABLE emergency_contact (
     name_        VARCHAR(128) NOT NULL,
     phone        VARCHAR(30)  NOT NULL,
     relationship VARCHAR(64)  NOT NULL      CHECK (relationship ~* '^[A-Za-z .-]+$'),
-    user_id      INTEGER      NOT NULL, 
-    FOREIGN KEY (user_id) REFERENCES user_(id) ON DELETE CASCADE
+    FOREIGN KEY (id) REFERENCES user_(id) ON DELETE CASCADE
 );
 -- +goose StatementEnd
 
