@@ -9,7 +9,7 @@ import (
 )
 
 type Users struct {
-	UserId      int
+	userId      int
 	Email       string
 	Phone       string
 	password    sql.NullString
@@ -21,6 +21,14 @@ type Users struct {
 	CreatedAt   time.Time
 	LastLogin   sql.NullTime
 	HasLeft     bool
+}
+
+func (m *Users) GetPKs() []any {
+	return []any{m.userId}
+}
+
+func (m *Users) UserId() int {
+	return m.userId
 }
 
 func (m *Users) Update(db service.Database) error {
@@ -37,7 +45,7 @@ func (m *Users) Update(db service.Database) error {
 		    created_at = $9,
 		    last_login = $10,
 		    has_left = $11
-		WHERE id = $12
+		WHERE userId = $12
 	`
 
 	_, err := db.Exec(query,
@@ -52,24 +60,24 @@ func (m *Users) Update(db service.Database) error {
 		m.CreatedAt,
 		m.LastLogin,
 		m.HasLeft,
-		m.UserId,
+		m.userId,
 	)
 
 	return err
 }
 
-func FindById(db service.Database, userId int) (*Users, error) {
+func FindUserById(db service.Database, userId int) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
-		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
-		       gender, nationality, created_at, last_login, has_left 
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth,
+		       gender, nationality, created_at, last_login, has_left
 		FROM users
-		WHERE user_id = $1 
+		WHERE user_id = $1
 		LIMIT 1`, userId)
 
 	err := row.Scan(
-		&user.UserId,
+		&user.userId,
 		&user.Email,
 		&user.Phone,
 		&user.password,
@@ -102,7 +110,7 @@ func (m *Users) SetPassword(db service.Database, inputPassword string) error {
 		Valid:  true,
 	}
 
-	_, err = db.Exec(`UPDATE users SET "password" = $1 WHERE id = $2`, m.password, m.UserId)
+	_, err = db.Exec(`UPDATE users SET "password" = $1 WHERE userId = $2`, m.password, m.userId)
 
 	return err
 }
@@ -125,14 +133,14 @@ func FindByEmail(db service.Database, email string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
-		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
-		       gender, nationality, created_at, last_login, has_left 
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth,
+		       gender, nationality, created_at, last_login, has_left
 		FROM users
-		WHERE email = $1 
+		WHERE email = $1
 		LIMIT 1`, email)
 
 	err := row.Scan(
-		&user.UserId,
+		&user.userId,
 		&user.Email,
 		&user.Phone,
 		&user.password,
@@ -159,14 +167,14 @@ func FindByPhone(db service.Database, phone string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
-		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth, 
-		       gender, nationality, created_at, last_login, has_left 
+		SELECT user_id, email, phone, "password", first_name, last_name, date_of_birth,
+		       gender, nationality, created_at, last_login, has_left
 		FROM users
 		WHERE phone = $1
 		LIMIT 1`, phone)
 
 	err := row.Scan(
-		&user.UserId,
+		&user.userId,
 		&user.Email,
 		&user.Phone,
 		&user.password,

@@ -1,7 +1,6 @@
 package model
 
-import "github.com/abrarshakhi/hostel-management-server/internal/service"
-
-type Model interface {
-	Update(db service.Database) error
-}
+// type model interface {
+// 	GetPKs() []any
+// 	Update(db service.Database) error
+// }

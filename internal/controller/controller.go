@@ -25,6 +25,7 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 	rg.PATCH("/change-password", controller.userChangePassword)
 	rg.PATCH("/forget-password", controller.userForgetPassword)
 
+	rg.PATCH("/active", controller.userActivateAccount)
 	rg.POST("/send-otp", middleware.IdentifyOtpUser, controller.userSendOtp)
 }
 
