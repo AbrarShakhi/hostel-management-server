@@ -16,10 +16,6 @@ type UserOtp struct {
 	attempts  int
 }
 
-func (m *UserOtp) GetPKs() []any {
-	return []any{m.userId}
-}
-
 func (m *UserOtp) UserId() int {
 	return m.userId
 }

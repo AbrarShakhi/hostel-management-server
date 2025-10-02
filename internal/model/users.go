@@ -23,10 +23,6 @@ type Users struct {
 	HasLeft     bool
 }
 
-func (m *Users) GetPKs() []any {
-	return []any{m.userId}
-}
-
 func (m *Users) UserId() int {
 	return m.userId
 }
