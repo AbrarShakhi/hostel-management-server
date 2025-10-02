@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/smtp"
+	"os"
 	"sync"
 	"text/template"
 )
@@ -17,18 +18,23 @@ type Email struct {
 }
 
 var (
+	smtpHost      = os.Getenv("SMTP_HOST")
+	smtpPort      = os.Getenv("SMTP_PORT")
+	emailUsername = os.Getenv("EMAIL_USERNAME")
+	emailPassword = os.Getenv("EMAIL_PASSWORD")
+	emailFrom     = os.Getenv("EMAIL_FROM")
 	emailInstance *Email
-	once          sync.Once
+	emailOnce     sync.Once
 )
 
 func EmailInstance() *Email {
-	once.Do(func() {
+	emailOnce.Do(func() {
 		emailInstance = &Email{
-			smtpHost: "smtp.example.com",
-			smtpPort: "587",
-			username: "your@email.com",
-			password: "your-password",
-			from:     "no-reply@example.com",
+			smtpHost: smtpHost,
+			smtpPort: port,
+			username: emailUsername,
+			password: emailPassword,
+			from:     emailFrom,
 		}
 	})
 	return emailInstance

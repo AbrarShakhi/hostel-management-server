@@ -27,7 +27,7 @@ func (m *Users) UserId() int {
 	return m.userId
 }
 
-func (m *Users) Update(db service.Database) error {
+func (m *Users) Update(db *service.Database) error {
 	query := `
 		UPDATE users
 		SET email = $1,
@@ -62,7 +62,7 @@ func (m *Users) Update(db service.Database) error {
 	return err
 }
 
-func FindUserById(db service.Database, userId int) (*Users, error) {
+func FindUserById(db *service.Database, userId int) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
@@ -96,7 +96,7 @@ func FindUserById(db service.Database, userId int) (*Users, error) {
 	return &user, nil
 }
 
-func (m *Users) SetPassword(db service.Database, inputPassword string) error {
+func (m *Users) SetPassword(db *service.Database, inputPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(inputPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (m *Users) HasPassword() bool {
 	return m.password.Valid
 }
 
-func FindByEmail(db service.Database, email string) (*Users, error) {
+func FindByEmail(db *service.Database, email string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`
@@ -159,7 +159,7 @@ func FindByEmail(db service.Database, email string) (*Users, error) {
 	return &user, nil
 }
 
-func FindByPhone(db service.Database, phone string) (*Users, error) {
+func FindByPhone(db *service.Database, phone string) (*Users, error) {
 	var user Users
 
 	row := db.QueryRow(`

@@ -8,11 +8,11 @@ import (
 )
 
 type controller struct {
-	db    service.Database
-	email service.Email
+	db    *service.Database
+	email *service.Email
 }
 
-func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
+func InitUsersRoutes(rg *gin.RouterGroup, db *service.Database, email *service.Email) {
 	middleware, controller := middleware.NewMiddleware(), &controller{db: db, email: email}
 
 	rg.GET("/", controller.HelloWorld)
@@ -29,7 +29,7 @@ func InitUsersRoutes(rg *gin.RouterGroup, db service.Database, email service.Ema
 	rg.POST("/send-otp", middleware.IdentifyOtpUser, controller.userSendOtp)
 }
 
-func InitAdminsRoutes(rg *gin.RouterGroup, db service.Database, email service.Email) {
+func InitAdminsRoutes(rg *gin.RouterGroup, db *service.Database, email *service.Email) {
 	_, controller := middleware.NewMiddleware(), &controller{db: db, email: email}
 
 	rg.GET("/", controller.HelloWorld)

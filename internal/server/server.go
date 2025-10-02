@@ -15,8 +15,8 @@ import (
 
 type Server struct {
 	port  int
-	db    service.Database
-	email service.Email
+	db    *service.Database
+	email *service.Email
 }
 
 func NewServer() *http.Server {
@@ -34,8 +34,8 @@ func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port:  port,
-		db:    *db,
-		email: *email,
+		db:    db,
+		email: email,
 	}
 
 	server := &http.Server{

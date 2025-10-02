@@ -20,7 +20,7 @@ func (m *UserOtp) UserId() int {
 	return m.userId
 }
 
-func (m *UserOtp) Update(db service.Database) error {
+func (m *UserOtp) Update(db *service.Database) error {
 	deleteQ := `DELETE FROM user_otp WHERE user_id = $1`
 	_, err := db.Exec(deleteQ, m.userId)
 	if err != nil {
@@ -57,7 +57,7 @@ func (m *UserOtp) IsValidOtp(otpcode string) bool {
 	return otpcode == m.otpCode
 }
 
-func FindUserOtpById(db service.Database, userId int) (*UserOtp, error) {
+func FindUserOtpById(db *service.Database, userId int) (*UserOtp, error) {
 	var userOtp UserOtp
 
 	row := db.QueryRow(`
