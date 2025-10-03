@@ -2,20 +2,18 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (m *Middleware) VerifyUser(c *gin.Context) {
+func (m *middleware) VerifyUser(c *gin.Context) {
 	tokenString, err := c.Cookie("user_auth")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"msg": "cookie error",
-		})
+		m.unauthorizedCookieError(c)
 		return
 	}
 
@@ -26,33 +24,32 @@ func (m *Middleware) VerifyUser(c *gin.Context) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	}, jwt.WithLeeway(5*time.Second))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"msg": "cookie error",
-		})
+		m.unauthorizedCookieError(c)
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"msg": "cookie error",
-		})
+		m.unauthorizedCookieError(c)
 		return
 	}
 
 	if exp, ok := claims["exp"].(float64); ok && float64(time.Now().Unix()) > exp {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"msg": "cookie error",
-		})
-		return
-	}
-	if sub, ok := claims["sub"].(string); ok && sub == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"msg": "cookie error",
-		})
+		m.unauthorizedCookieError(c)
 		return
 	}
 
-	c.Set("user_id", claims["sub"])
+	sub, ok := claims["sub"].(string)
+	if !ok || sub == "" {
+		m.unauthorizedCookieError(c)
+		return
+	}
+
+	userId, err := strconv.Atoi(sub)
+	if err != nil {
+		m.unauthorizedCookieError(c)
+		return
+	}
+	c.Set("user_id", userId)
 	c.Next()
 }

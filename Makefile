@@ -7,11 +7,11 @@ build:
 	@echo "Building..."
 	
 	
-	@go build -o main cmd/api/main.go
+	@go build -o hostel-management-server cmd/main/main.go
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run cmd/main/main.go
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -42,7 +42,7 @@ itest:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -f hostel-management-server
 
 # Live Reload
 watch:

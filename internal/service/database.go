@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -25,10 +26,11 @@ var (
 	host       = os.Getenv("POSTGRES_DB_HOST")
 	schema     = os.Getenv("POSTGRES_DB_SCHEMA")
 	dbInstance *Database
+	dbOnce     sync.Once
 )
 
 func DbInstance() *Database {
-	once.Do(func() {
+	dbOnce.Do(func() {
 		psql, err := sql.Open("pgx",
 			fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
 				username, password, host, port, database, schema))
