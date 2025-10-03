@@ -16,8 +16,8 @@ type UserOtp struct {
 	attempts  int
 }
 
-func (m *UserOtp) UserId() int {
-	return m.userId
+func (m *UserOtp) OtpCode() string {
+	return m.otpCode
 }
 
 func (m *UserOtp) Update(db *service.Database) error {
@@ -27,8 +27,12 @@ func (m *UserOtp) Update(db *service.Database) error {
 		return err
 	}
 
+	return insertAndFillUserOtp(db, m.userId, m)
+}
+
+func insertAndFillUserOtp(db *service.Database, userId int, userOtp *UserOtp) error {
 	insertQ := `INSERT INTO user_otp (user_id) VALUES ($1)`
-	_, err = db.Exec(insertQ, m.userId)
+	_, err := db.Exec(insertQ, userId)
 	if err != nil {
 		return err
 	}
@@ -37,24 +41,24 @@ func (m *UserOtp) Update(db *service.Database) error {
 		SELECT user_id, otp_code, created_at, expires_at, is_used, attempts
 		FROM user_otp
 		WHERE user_id = $1
-		LIMIT 1`, m.userId)
+		LIMIT 1`, userId)
 
 	err = row.Scan(
-		&m.userId,
-		&m.otpCode,
-		&m.createdAt,
-		&m.expiresAt,
-		&m.isUsed,
-		&m.attempts,
+		userOtp.otpCode,
+		userOtp.userId,
+		userOtp.createdAt,
+		userOtp.expiresAt,
+		userOtp.isUsed,
+		userOtp.attempts,
 	)
 	return err
 }
+func (m *UserOtp) IsExpired() bool {
+	return m == nil || m.isUsed || m.attempts >= 5 || time.Now().After(m.expiresAt)
+}
 
 func (m *UserOtp) IsValidOtp(otpcode string) bool {
-	if m == nil || m.isUsed || m.attempts >= 5 || time.Now().After(m.expiresAt) {
-		return false
-	}
-	return otpcode == m.otpCode
+	return !m.IsExpired() && otpcode == m.otpCode
 }
 
 func FindUserOtpById(db *service.Database, userId int) (*UserOtp, error) {
@@ -76,7 +80,8 @@ func FindUserOtpById(db *service.Database, userId int) (*UserOtp, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			err := insertAndFillUserOtp(db, userId, &userOtp)
+			return &userOtp, err
 		}
 		return nil, err
 	}

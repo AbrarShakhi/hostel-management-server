@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -330,4 +331,76 @@ func (h *controller) userChangePassword(c *gin.Context) {
 }
 
 func (h *controller) userSendOtp(c *gin.Context) {
+	identifier := c.Query("identifier")
+	if identifier == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Missing 'identifier' query parameter"})
+		return
+	}
+	var reason int
+	if reason, err := strconv.Atoi(c.Query("reason")); err != nil || (reason != 1 && reason != 2) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid 'reason', must be 1 or 2"})
+		return
+	}
+
+	var user *model.Users
+	var err error
+	if strings.Contains(identifier, "@") {
+		user, err = model.FindByEmail(h.db, identifier)
+	} else {
+		user, err = model.FindByPhone(h.db, identifier)
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"msg": "Invalid user email or phone."})
+		return
+	}
+
+	if user.HasLeft {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "You have left the hostel."})
+		return
+	}
+
+	userOtp, err := model.FindUserOtpById(h.db, user.UserId())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
+		return
+	}
+	if userOtp.IsExpired() {
+		err = userOtp.Update(h.db)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"msg": "Something happend getting your data."})
+			return
+		}
+	}
+
+	data := struct {
+		Name string
+		OTP  string
+	}{
+		Name: user.FirstName,
+		OTP:  userOtp.OtpCode(),
+	}
+
+	var (
+		subject  string = "Here is your code for "
+		template string = "send_otp.html"
+	)
+	if reason == 1 {
+		subject += "Active your account"
+	} else {
+		subject = "Reset your password"
+	}
+
+	err = h.email.SendTemplateEmail(
+		user.Email,
+		subject,
+		"internal/view/"+template,
+		data,
+	)
+	if err != nil {
+		log.Fatalf("Failed to send email: %v", err)
+	}
 }
