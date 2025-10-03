@@ -3,10 +3,10 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"os"
 	"sync"
-	"text/template"
 )
 
 type Email struct {
@@ -31,7 +31,7 @@ func EmailInstance() *Email {
 	emailOnce.Do(func() {
 		emailInstance = &Email{
 			smtpHost: smtpHost,
-			smtpPort: port,
+			smtpPort: smtpPort,
 			username: emailUsername,
 			password: emailPassword,
 			from:     emailFrom,
@@ -59,16 +59,17 @@ func (e *Email) sendEmail(to string, subject string, body string) error {
 	auth := smtp.PlainAuth("", e.username, e.password, e.smtpHost)
 
 	msg := []byte("To: " + to + "\r\n" +
+		"From: " + e.from + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"MIME-version: 1.0;\r\n" +
 		"Content-Type: text/html; charset=\"UTF-8\";\r\n\r\n" +
 		body)
 
 	addr := fmt.Sprintf("%s:%s", e.smtpHost, e.smtpPort)
+
 	err := smtp.SendMail(addr, auth, e.from, []string{to}, msg)
 	if err != nil {
 		return fmt.Errorf("failed to send email: %w", err)
 	}
-
 	return nil
 }
